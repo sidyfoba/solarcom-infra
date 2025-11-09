@@ -1,0 +1,23 @@
+services:
+  mongodb:
+    image: mongo:7.0     # <-- put the tag that matches your FCV
+    container_name: mongodb
+    command: ["mongod","--bind_ip_all"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./database-data:/data/db
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    ports:
+      - "9002:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://root:password@mongodb:27017/?authSource=admin
+    depends_on:
+      - mongodb
+
