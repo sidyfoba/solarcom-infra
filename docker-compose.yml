@@ -11,7 +11,7 @@ services:
   mongodb:
     image: mongo:7.0     # <-- match your FCV
     container_name: mongodb
-    command: ["mongod","--bind_ip_all"]
+    command: ["mongod", "--bind_ip_all"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
@@ -65,34 +65,35 @@ services:
         condition: service_healthy
     networks: [codeps-network]
     restart: unless-stopped
-    # If you have Actuator, you can enable this:
+    # Optional healthcheck (if you have Actuator):
     # healthcheck:
     #   test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
     #   interval: 30s
     #   timeout: 5s
     #   retries: 5
-    web:
+
+  web:
     build:
       context: ../frontend
       args:
-        # Build-time vars for Vite; include base path so assets work at /app/
+        # Build-time vars for Vite or other frontend builds
         VITE_GOOGLE_MAPS_API_KEY: "${VITE_GOOGLE_MAPS_API_KEY}"
         VITE_GOOGLE_MAPS_ID: "${VITE_GOOGLE_MAPS_ID}"
         # VITE_BASE_PATH: "/app/"
         VITE_API_URL: "https://solarcom.folyideaz.com"
     container_name: solarcom-web
     restart: always
-    depends_on: [app]
+    depends_on:
+      - solarcom-app
     environment:
-      # Tell nginx-proxy to route this vhost to this container (port 80 inside)
+      # nginx-proxy routing (if using jwilder/nginx-proxy)
       VIRTUAL_HOST: "solarcom.folyideaz.com"
       LETSENCRYPT_HOST: "solarcom.folyideaz.com"
-      # Optional: increase body size if you upload files
+      # Optional: increase upload size for large files
       CLIENT_MAX_BODY_SIZE: 50m
     expose:
-      - "80"     # internal only
+      - "80"   # internal only (used by nginx-proxy)
     # volumes:
-    #   # Provide custom nginx config (see step 3) to serve under /app and proxy /app/api
     #   - ./nginx-app.conf:/etc/nginx/conf.d/default.conf:ro
     networks: [codeps-network]
 
