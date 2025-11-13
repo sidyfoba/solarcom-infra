@@ -45,10 +45,10 @@ services:
   solarcom-app:
     container_name: solarcom-app
     build:
-      context: .
+      context: ../backend
       dockerfile: Dockerfile
     ports:
-      - "8082:8080"
+      - "8081:8080"
     environment:
       # Override Mongo URI for in-network access (service name instead of localhost)
       SPRING_DATA_MONGODB_URI: mongodb://root:password@mongodb:27017/solarcomdb?authSource=admin
@@ -56,7 +56,10 @@ services:
       # Mail creds picked up by application.yml as ${MAIL_USER}/${MAIL_PASS}
       MAIL_USER: your@gmail.com
       MAIL_PASS: your-app-password   # Use a Gmail App Password if using Gmail SMTP
-
+      APP_CORS_ALLOWED_ORIGINS: "https://solarcom.folyideaz.com"
+      SPRING_MVC_CORS_ALLOWED_METHODS: GET,POST,PUT,PATCH,DELETE,OPTIONS
+      SPRING_MVC_CORS_ALLOWED_HEADERS: "*"
+      SPRING_MVC_CORS_ALLOW_CREDENTIALS: "true"
       # Optional: choose a Spring profile and JVM opts
       SPRING_PROFILES_ACTIVE: default
       JAVA_OPTS: "-XX:MaxRAMPercentage=75 -XX:+UseG1GC"
@@ -72,7 +75,7 @@ services:
     #   timeout: 5s
     #   retries: 5
 
-  web:
+  solarcom-web:
     build:
       context: ../frontend
       args:
